@@ -1,11 +1,18 @@
 import streamlit as st
 import pandas as pd
+import sqlalchemy
 
-# Establish connection to the database using st.connection
-conn = st.connection("my_database")
+conn = (
+    f"mysql+pymysql://{st.secrets['connections']['my_database']['username']}:"
+    f"{st.secrets['connections']['my_database']['password']}@"
+    f"{st.secrets['connections']['my_database']['host']}:"
+    f"{st.secrets['connections']['my_database']['port']}/"
+    f"{st.secrets['connections']['my_database']['database']}"
+)
+engine = sqlalchemy.create_engine(conn)
 
 # Query the database to retrieve revenue table values into a DataFrame
-revenue_df = conn.query('''
+revenue_query='''
 SELECT 
     local_authorities.name AS name,
     provinces.name AS province_name,
@@ -62,9 +69,13 @@ ORDER BY
     local_authorities.name,
     actual_budgets.year,
     actual_budgets.month;
-''')
+''';
+
+revenue_df = pd.read_sql_query(revenue_query, engine)
 
 revenue_df.fillna(0, inplace=True)
+
+
 
 # Calculate the total recurrent revenue budget and actual amounts
 revenue_df['RecurrentRevenueTotalBudget'] = (
@@ -99,7 +110,7 @@ revenue_df = revenue_df[['name','month', 'year','province_name', 'district_name'
        ]]
 
 # Query the database to retrieve expenditure table values into a DataFrame
-expenditure_df = conn.query('''
+expenditure_query='''
 SELECT 
     local_authorities.name AS name,
     provinces.name AS province_name,
@@ -156,7 +167,9 @@ ORDER BY
     local_authorities.name,
     actual_budgets.year,
     actual_budgets.month;
-''')
+''';
+
+expenditure_df=pd.read_sql_query(expenditure_query, engine)
 
 expenditure_df.fillna(0, inplace=True)
 
@@ -195,7 +208,7 @@ expenditure_df = expenditure_df[['name','month', 'year','province_name', 'distri
 
 
 # Query the database to retrieve additional data table values into a DataFrame
-additional_df = conn.query('''
+additional_query='''
 SELECT 
     local_authorities.name AS name,
     provinces.name AS province_name,
@@ -232,7 +245,10 @@ ORDER BY
     local_authorities.name,
     actual_budgets.year,
     actual_budgets.month;
-''')
+''';
+
+
+additional_df=pd.read_sql_query(additional_query, engine)
 
 additional_df.fillna(0, inplace=True)
 

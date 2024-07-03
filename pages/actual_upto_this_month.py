@@ -1,11 +1,18 @@
+import sqlalchemy
 import streamlit as st
 import pandas as pd
 
-# Establish connection to the database using st.connection
-conn = st.connection("my_database")
+conn = (
+    f"mysql+pymysql://{st.secrets['connections']['my_database']['username']}:"
+    f"{st.secrets['connections']['my_database']['password']}@"
+    f"{st.secrets['connections']['my_database']['host']}:"
+    f"{st.secrets['connections']['my_database']['port']}/"
+    f"{st.secrets['connections']['my_database']['database']}"
+)
+engine = sqlalchemy.create_engine(conn)
 
 # Query the database to retrieve table values into a DataFrame
-revenue_df = conn.query('''
+revenue_query='''
 SELECT 
     local_authorities.name AS name,
     provinces.name AS province_name,
@@ -62,7 +69,9 @@ ORDER BY
     local_authorities.name,
     actual_budgets.year,
     actual_budgets.month;
-''')
+'''
+
+revenue_df = pd.read_sql_query(revenue_query, engine)
 
 revenue_df.fillna(0, inplace=True)
 
@@ -123,7 +132,7 @@ revenue_df = revenue_df[['name','month', 'year','province_name', 'district_name'
        ]]
 
 
-expenditure_df = conn.query('''
+expenditure_query='''
 SELECT 
     local_authorities.name AS name,
     provinces.name AS province_name,
@@ -180,11 +189,13 @@ ORDER BY
     local_authorities.name,
     actual_budgets.year,
     actual_budgets.month;
-''')
+''';
 
 
 
-expenditure_df.fillna(0, inplace=True)
+expenditure_df = pd.read_sql_query(expenditure_query, engine)
+
+revenue_df.fillna(0, inplace=True)
 
 # Ensure 'month' contains valid month values (1-12)
 expenditure_df['month'] = expenditure_df['month'].astype(str).str.zfill(2)  # Ensure two-digit month format
@@ -247,7 +258,7 @@ expenditure_df = expenditure_df[['name','month', 'year','province_name', 'distri
        ]]
 
 # Query the database to retrieve table values into a DataFrame for additional data
-additional_df = conn.query('''
+additional_query='''
 SELECT 
     local_authorities.name AS name,
     provinces.name AS province_name,
@@ -284,10 +295,12 @@ ORDER BY
     local_authorities.name,
     actual_budgets.year,
     actual_budgets.month;
-''')
+''';
 
 
-additional_df.fillna(0, inplace=True)
+additional_df = pd.read_sql_query(additional_query, engine)
+
+revenue_df.fillna(0, inplace=True)
 
 # Ensure 'month' contains valid month values (1-12)
 additional_df['month'] = additional_df['month'].astype(str).str.zfill(2)  # Ensure two-digit month format
