@@ -2,14 +2,14 @@ import streamlit as st
 import pandas as pd
 import sqlalchemy
 
-conn = (
-    f"mysql+pymysql://{st.secrets['connections']['my_database']['username']}:"
-    f"{st.secrets['connections']['my_database']['password']}@"
-    f"{st.secrets['connections']['my_database']['host']}:"
-    f"{st.secrets['connections']['my_database']['port']}/"
-    f"{st.secrets['connections']['my_database']['database']}"
-)
-engine = sqlalchemy.create_engine(conn)
+# Load secrets from Streamlit secrets
+secrets = st.secrets["connections"]["my_database"]
+
+# Construct connection string
+conn_string = f"mysql+pymysql://{secrets['username']}:{secrets['password']}@{secrets['host']}:{secrets['port']}/{secrets['database']}"
+
+# Create SQLAlchemy engine
+engine = sqlalchemy.create_engine(conn_string)
 
 # Query the database to retrieve revenue table values into a DataFrame
 revenue_query='''
