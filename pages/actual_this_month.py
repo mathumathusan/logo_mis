@@ -3,13 +3,21 @@ import pandas as pd
 import sqlalchemy
 
 # Load secrets from Streamlit secrets
-secrets = st.secrets["connections"]["my_database"]
+try:
+    secrets = st.secrets["connections"]["my_database"]
+except KeyError as e:
+    st.error(f"Error: Missing key '{e.args[0]}' in secrets. Check your secrets configuration.")
+    st.stop()
 
 # Construct connection string
 conn_string = f"mysql+pymysql://{secrets['username']}:{secrets['password']}@{secrets['host']}:{secrets['port']}/{secrets['database']}"
 
 # Create SQLAlchemy engine
-engine = sqlalchemy.create_engine(conn_string)
+try:
+    engine = sqlalchemy.create_engine(conn_string)
+except Exception as e:
+    st.error(f"Error connecting to the database: {e}")
+    st.stop()
 
 # Query the database to retrieve revenue table values into a DataFrame
 revenue_query='''
