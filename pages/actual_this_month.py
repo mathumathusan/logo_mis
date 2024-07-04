@@ -1,3 +1,4 @@
+import sqlalchemy
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine
@@ -22,6 +23,7 @@ except sqlalchemy.exc.OperationalError as e:
     st.error(f"OperationalError: {e}")
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
+
 
 
 # Query the database to retrieve revenue table values into a DataFrame
