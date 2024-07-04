@@ -1,6 +1,8 @@
+import sqlalchemy
 import streamlit as st
 import pandas as pd
-import sqlalchemy
+from sqlalchemy import create_engine
+import pymysql
 
 # Load secrets from Streamlit secrets
 try:
@@ -12,12 +14,16 @@ except KeyError as e:
 # Construct connection string
 conn_string = f"mysql+pymysql://{secrets['username']}:{secrets['password']}@{secrets['host']}:{secrets['port']}/{secrets['database']}"
 
-# Create SQLAlchemy engine
+# Create engine and connect to the database
 try:
-    engine = sqlalchemy.create_engine(conn_string)
+    engine = create_engine(conn_string)
+    connection = engine.connect()
+    st.success("Successfully connected to the database!")
+except sqlalchemy.exc.OperationalError as e:
+    st.error(f"OperationalError: {e}")
 except Exception as e:
-    st.error(f"Error connecting to the database: {e}")
-    st.stop()
+    st.error(f"An unexpected error occurred: {e}")
+
 
 # Query the database to retrieve table values into a DataFrame
 revenue_query='''
