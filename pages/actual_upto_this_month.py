@@ -16,7 +16,7 @@ conn_string = f"mysql+pymysql://{secrets['username']}:{secrets['password']}@{sec
 
 # Create engine and connect to the database
 try:
-    engine = create_engine(conn_string)
+    engine = create_engine(conn_string,pool_pre_ping=True)
     connection = engine.connect()
     st.success("Successfully connected to the database!")
 except sqlalchemy.exc.OperationalError as e:
